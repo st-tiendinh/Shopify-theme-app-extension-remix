@@ -1,0 +1,69 @@
+<style>
+  .custom-select {
+    display: inline-block;
+  }
+
+  .custom-select select {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    font-size: 14px;
+    text-align: center;
+    padding: 10px 40px;
+    background-color: #fff;
+    border: 1px solid #caced1;
+    border-radius: 0.25rem;
+    color: #000;
+    cursor: pointer;
+  }
+
+  #price {
+    font-size: 20px;
+  }
+</style>
+
+<div class="custom-select">
+  <select name="product-price" id="product-price-currency">
+    <option value="VND">VND (đ) | Vietnam</option>
+    <option value="USD">USD ($) | United States</option>
+    <option value="YEN">YEN (¥) | Japan</option>
+  </select>
+</div>
+<p id="price">{{ product.price | money_with_currency }}</p>
+
+<script>
+  const exchangeRates = {
+    VND: 1,
+    USD: 0.000043,
+    YEN: 0.0047
+  };
+  const originalPrice = {{ product.price | money_without_currency }}
+
+  function convertCurrency(amount, fromCurrency, toCurrency) {
+    const fromRate = exchangeRates[fromCurrency];
+    const toRate = exchangeRates[toCurrency];
+    if (!fromRate || !toRate) {
+      throw new Error('Invalid currency specified');
+    }
+    return (amount / fromRate) * toRate;
+  }
+
+  document.getElementById('product-price-currency').addEventListener('change', function(event) {
+    const priceElement = document.getElementById('price')
+    const toCurrency = event.target.value;
+    const convertedAmount = convertCurrency(+originalPrice, 'VND', toCurrency);
+    if (Number.isInteger(convertedAmount)) {
+      priceElement.innerText = `${convertedAmount} ${toCurrency}`;
+    } else {
+      priceElement.innerText = `${convertedAmount.toFixed(3)} ${toCurrency}`;
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Product Price",
+  "target": "section",
+  "settings": []
+}
+{% endschema %}

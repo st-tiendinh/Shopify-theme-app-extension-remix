@@ -1,0 +1,24 @@
+<style>
+  .chat-popup {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+  }
+
+  .chat-popup img {
+    width: 50px;
+    object-fit: cover;
+  }
+</style>
+
+<div class="chat-popup">
+  {{ "messenger.png" | asset_url | img_tag }}
+</div>
+
+{% schema %}
+  {
+    "name": "App embed",
+    "target": "body",
+    "settings": []
+  }
+{% endschema %}

@@ -1,0 +1,81 @@
+<style>
+  .custom-select {
+    display: inline-block;
+  }
+
+  .custom-select select {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    font-size: 14px;
+    text-align: center;
+    padding: 10px 40px;
+    background-color: #fff;
+    border: 1px solid #caced1;
+    border-radius: 0.25rem;
+    color: #000;
+    cursor: pointer;
+  }
+</style>
+
+<div class="custom-select">
+  <select name="product-price" id="product-price-currency">
+    <option value="VND">VND (đ) | Vietnam</option>
+    <option value="USD">USD ($) | United States</option>
+    <option value="YEN">YEN (¥) | Japan</option>
+  </select>
+  <div>{{ product.price }}</div>
+</div>
+
+<script>
+  window.onload = function () {
+    const priceList = document.querySelectorAll('span.price-item.price-item--regular');
+    const productListPrice = Array.from(priceList)
+      .map((price) => {
+        return +price.innerHTML.replace(/[^0-9]/g, '');
+      })
+      .filter((price) => price !== 0);
+    const exchangeRates = {
+      VND: 1,
+      USD: 0.000043,
+      YEN: 0.0047,
+    };
+
+    function convertMoney(amount, fromCurrency, toCurrency) {
+      const fromRate = exchangeRates[fromCurrency];
+      const toRate = exchangeRates[toCurrency];
+      if (!fromRate || !toRate) {
+        throw new Error('Invalid currency specified');
+      }
+      const result = (amount / fromRate) * toRate;
+      if (!isNaN(result)) {
+        return result;
+      }
+    }
+
+    document.getElementById('product-price-currency').addEventListener('change', function (event) {
+      const toCurrency = event.target.value;
+      priceList.forEach((price, index) => {
+        const num = productListPrice[index];
+        const converted = convertMoney(num, 'VND', toCurrency);
+        if (Number.isInteger(converted)) {
+          price.innerText = price.innerText.includes('From')
+            ? `From ${converted} ${toCurrency}`
+            : `${converted} ${toCurrency}`;
+        } else {
+          price.innerText = price.innerText.includes('From')
+            ? `From ${converted.toFixed(3)} ${toCurrency}`
+            : `${converted.toFixed(3)} ${toCurrency}`;
+        }
+      });
+    });
+  };
+</script>
+
+{% schema %}
+{
+  "name": "Product List Price",
+  "target": "section",
+  "settings": []
+}
+{% endschema %}
